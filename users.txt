@@ -1,0 +1,7 @@
+ADMIN,admin,admin123
+<<<<<<< HEAD
+CUSTOMER,HI,Seandre1025,Jarmagne Villamin,jarmagne25@gmail.com
+=======
+CUSTOMER,magne,magne,magne
+CUSTOMER,HI,Seandre,Jaeefefefe
+>>>>>>> 9a126a4 (second)
