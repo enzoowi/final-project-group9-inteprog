@@ -1,7 +1,7 @@
 ADMIN,admin,admin123
-<<<<<<< HEAD
-CUSTOMER,HI,Seandre1025,Jarmagne Villamin,jarmagne25@gmail.com
-=======
-CUSTOMER,magne,magne,magne
+CUSTOMER,magne,magne,magne villamin
 CUSTOMER,HI,Seandre,Jaeefefefe
->>>>>>> 9a126a4 (second)
+CUSTOMER,brian,brian,brian miranda
+CUSTOMER,boriz,boriz,boriz macalintal
+CUSTOMER,aaron,aaron,aaron naval
+CUSTOMER,andrei,andrei,andrei carandang
