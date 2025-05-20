@@ -280,4 +280,288 @@ private:
                 }
             }
             userFile.close();
+<<<<<<< HEAD
         }
+=======
+        }
+        
+        // Load movies
+        ifstream movieFile("movies.txt");
+        if (movieFile.is_open()) {
+            string line;
+            while (getline(movieFile, line)) {
+                vector<string> tokens;
+                string token;
+                istringstream tokenStream(line);
+                while (getline(tokenStream, token, ',')) {
+                    tokens.push_back(token);
+                }
+
+                if (tokens.size() >= 3) {
+                    Movie movie(tokens[1], tokens[2]);
+                    for (size_t i = 3; i < tokens.size(); i += 2) {
+                        if (i + 1 < tokens.size()) {
+                            movie.addSchedule(Schedule(tokens[i], tokens[i+1]));
+                        }
+                    }
+                    movies.push_back(movie);
+                }
+            }
+            movieFile.close();
+        }
+
+        // Load bookings
+        ifstream bookingFile("bookings.txt");
+        if (bookingFile.is_open()) {
+            string line;
+            while (getline(bookingFile, line)) {
+                vector<string> tokens;
+                string token;
+                istringstream tokenStream(line);
+                while (getline(tokenStream, token, ',')) {
+                    tokens.push_back(token);
+                }
+
+                if (tokens.size() >= 6) {
+                    bookings.push_back(Booking(
+                        tokens[1], 
+                        stoi(tokens[2]), 
+                        Schedule(tokens[3], tokens[4]), 
+                        tokens[5]
+                    ));
+                }
+            }
+            bookingFile.close();
+        }
+
+        // Load seats
+        ifstream seatFile("seats.txt");
+        if (seatFile.is_open()) {
+            string line;
+            while (getline(seatFile, line)) {
+                vector<string> tokens;
+                string token;
+                istringstream tokenStream(line);
+                while (getline(tokenStream, token, ',')) {
+                    tokens.push_back(token);
+                }
+
+                if (tokens.size() >= 4) {
+                    int movieID = stoi(tokens[0]);
+                    string date = tokens[1];
+                    string seat = tokens[2];
+                    bool available = (tokens[3] == "1");
+                    movieSeats[{movieID, date}][seat] = available;
+                }
+            }
+            seatFile.close();
+        } else {
+            // Initialize seats for existing movies
+            for (const auto& movie : movies) {
+                for (const auto& schedule : movie.getSchedules()) {
+                    initializeSeatsForMovie(movie.getMovieID(), schedule.getDate());
+                }
+            }
+        }
+    }
+
+public:
+    static CinemaBookingSystem* getInstance() {
+        if (!instance) instance = new CinemaBookingSystem();
+        return instance;
+    }
+
+    static void cleanup() {
+        delete instance;
+        instance = nullptr;
+    }
+
+    ~CinemaBookingSystem() { saveData(); }
+
+    void saveData() {
+        // Save users
+        ofstream userFile("users.txt");
+        if (userFile.is_open()) {
+            for (const auto& user : users) {
+                if (user->getUserType() == "CUSTOMER") {
+                    Customer* cust = dynamic_cast<Customer*>(user.get());
+                    if (cust) {
+                        userFile << "CUSTOMER," << cust->getUsername() << "," 
+                                << cust->getPassword() << "," << cust->getName() << endl;
+                    }
+                } else if (user->getUserType() == "ADMIN") {
+                    userFile << "ADMIN," << user->getUsername() << "," << user->getPassword() << endl;
+                }
+            }
+            userFile.close();
+        }
+
+        // Save movies
+        ofstream movieFile("movies.txt");
+        if (movieFile.is_open()) {
+            for (const auto& movie : movies) {
+                movieFile << movie.getMovieID() << "," << movie.getTitle() << "," << movie.getGenre();
+                for (const auto& sched : movie.getSchedules()) {
+                    movieFile << "," << sched.getDate() << "," << sched.getTime();
+                }
+                movieFile << endl;
+            }
+            movieFile.close();
+        }
+
+        // Save bookings
+        ofstream bookingFile("bookings.txt");
+        if (bookingFile.is_open()) {
+            for (const auto& booking : bookings) {
+                bookingFile << booking.getBookingID() << "," << booking.getCustomerUsername() << ","
+                           << booking.getMovieID() << "," << booking.getSchedule().getDate() << ","
+                           << booking.getSchedule().getTime() << "," << booking.getSeat() << endl;
+            }
+            bookingFile.close();
+        }
+
+        // Save seats
+        ofstream seatFile("seats.txt");
+        if (seatFile.is_open()) {
+            for (const auto& movieSeatPair : movieSeats) {
+                int movieID = movieSeatPair.first.first;
+                string date = movieSeatPair.first.second;
+                for (const auto& seat : movieSeatPair.second) {
+                    seatFile << movieID << "," << date << "," << seat.first << "," << seat.second << endl;
+                }
+            }
+            seatFile.close();
+        }
+    }
+
+    vector<unique_ptr<User>>& getUsers() { return users; }
+    vector<Movie>& getMovies() { return movies; }
+    vector<Booking>& getBookings() { return bookings; }
+
+    // Seat management interface
+    void initializeSeatsForNewMovie(int movieID, const string& date) {
+        initializeSeatsForMovie(movieID, date);
+    }
+
+    void removeSeatsForMovie(int movieID, const string& date) {
+        movieSeats.erase({movieID, date});
+    }
+
+    bool hasBookingsForSchedule(int movieID, const string& date) const {
+        return any_of(bookings.begin(), bookings.end(), 
+            [&](const Booking& b) { 
+                return b.getMovieID() == movieID && b.getSchedule().getDate() == date; 
+            });
+    }
+
+    bool isSeatAvailable(int movieID, const string& date, const string& seat) const {
+        auto it = movieSeats.find({movieID, date});
+        return it != movieSeats.end() && it->second.count(seat) && it->second.at(seat);
+    }
+
+    void bookSeat(int movieID, const string& date, const string& seat) {
+        auto& seats = movieSeats[{movieID, date}];
+        if (seats.count(seat)) seats[seat] = false;
+    }
+
+    void freeSeat(int movieID, const string& date, const string& seat) {
+        auto& seats = movieSeats[{movieID, date}];
+        if (seats.count(seat)) seats[seat] = true;
+    }
+
+    void displaySeatLayout(int movieID, const string& date) const {
+        auto it = movieSeats.find({movieID, date});
+        if (it == movieSeats.end()) {
+            cout << "No seat data available for this date." << endl;
+            return;
+        }
+
+        cout << "\n\t\t\t   ============ SCREEN ============" << endl;
+        cout << "\t\t\t   -------------------------------" << endl << endl;
+        
+        // Display column numbers
+        cout << "      ";
+        for (int num = 1; num <= 10; num++) {
+            cout << setw(3) << num;
+        }
+        cout << endl;
+
+        // Display seat rows
+        for (char row = 'A'; row <= 'H'; row++) {
+            cout << "   " << row << "  ";
+            for (int num = 1; num <= 10; num++) {
+                string seat = string(1, row) + to_string(num);
+                cout << setw(3) << (it->second.at(seat) ? "O" : "X");
+            }
+            cout << endl;
+        }
+
+        // Display key and additional information
+        cout << "\n\tO = Available\tX = Booked\t[ ] = Your Selection" << endl;
+        cout << "\t-----------------------------------------------" << endl;
+        cout << "\t\t   <<< FRONT OF THEATER >>>" << endl << endl;
+    }
+
+    User* login() {
+        string username, password;
+        bool loggedIn = false;
+        User* user = nullptr;
+        
+        while (!loggedIn) {
+            cout << "\n=== Login ===" << endl;
+            cout << "Username (or '0' to cancel): ";
+            cin >> username;
+            
+            if (username == "0") {
+                loggedIn = true; // Exit loop
+                continue;
+            }
+            
+            cout << "Password: ";
+            cin >> password;
+            clearInputBuffer();
+
+            for (const auto& u : users) {
+                if (u->getUsername() == username && u->getPassword() == password) {
+                    cout << "Login successful!" << endl;
+                    user = u.get();
+                    loggedIn = true;
+                    break;
+                }
+            }
+            
+            if (!loggedIn) {
+                cout << "Invalid username or password. Please try again." << endl;
+            }
+        }
+        return user;
+    }
+
+    void registerUser() {
+        string username, password, name;
+        bool registered = false;
+        
+        while (!registered) {
+            cout << "\n=== User Registration ===" << endl;
+            cout << "Username: ";
+            cin >> username;
+            
+            bool usernameTaken = false;
+            for (const auto& user : users) {
+                if (user->getUsername() == username) {
+                    usernameTaken = true;
+                    break;
+                }
+            }
+            
+            if (usernameTaken) {
+                cout << "Username already exists. Please choose another." << endl;
+                continue;
+            }
+
+            cout << "Password: ";
+            cin >> password;
+            clearInputBuffer();
+            cout << "Full Name: ";
+            getline(cin, name);
+>>>>>>> Magne

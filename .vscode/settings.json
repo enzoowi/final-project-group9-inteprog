@@ -56,6 +56,7 @@
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
 <<<<<<< HEAD
+<<<<<<< HEAD
   "C_Cpp_Runner.msvcSecureNoWarnings": false
 =======
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
@@ -63,4 +64,7 @@
     "iostream": "cpp"
   }
 >>>>>>> 9a126a4 (second)
+=======
+  "C_Cpp_Runner.msvcSecureNoWarnings": false
+>>>>>>> Magne
 }
