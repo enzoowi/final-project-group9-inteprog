@@ -88,7 +88,6 @@ bool isValidTime(const string& time) {
     return hour >= 0 && hour < 24 && minute >= 0 && minute < 60;
 }
 
-// Class definitions
 class Schedule {
 private:
     string date;
