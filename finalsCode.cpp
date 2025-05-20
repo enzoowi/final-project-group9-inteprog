@@ -280,9 +280,6 @@ private:
                 }
             }
             userFile.close();
-<<<<<<< HEAD
-        }
-=======
         }
         
         // Load movies
@@ -564,4 +561,283 @@ public:
             clearInputBuffer();
             cout << "Full Name: ";
             getline(cin, name);
->>>>>>> Magne
+if (getConfirmation("Confirm registration?")) {
+                users.push_back(make_unique<Customer>(username, password, name));
+                saveData();
+                cout << "Registration successful! You can now login." << endl;
+                registered = true;
+            } else {
+                cout << "Registration cancelled." << endl;
+                registered = true;
+            }
+        }
+    }
+
+    void addBooking(const Booking& booking) {
+        bookings.push_back(booking);
+        bookSeat(booking.getMovieID(), booking.getSchedule().getDate(), booking.getSeat());
+        saveData();
+    }
+
+    void removeBooking(int index) {
+        if (index >= 0 && index < bookings.size()) {
+            Booking& booking = bookings[index];
+            freeSeat(booking.getMovieID(), booking.getSchedule().getDate(), booking.getSeat());
+            bookings.erase(bookings.begin() + index);
+            saveData();
+        }
+    }
+
+    void updateBooking(int index, const Schedule& newSchedule, const string& newSeat) {
+        if (index >= 0 && index < bookings.size()) {
+            Booking& booking = bookings[index];
+            freeSeat(booking.getMovieID(), booking.getSchedule().getDate(), booking.getSeat());
+            booking = Booking(
+                booking.getCustomerUsername(),
+                booking.getMovieID(),
+                newSchedule,
+                newSeat
+            );
+            bookSeat(booking.getMovieID(), newSchedule.getDate(), newSeat);
+            saveData();
+        }
+    }
+
+    string getValidSeat(int movieID, const string& date) {
+        string seat;
+        bool validSeat = false;
+        
+        while (!validSeat) {
+            cout << "Enter seat (e.g., A1) or '0' to cancel: ";
+            cin >> seat;
+            transform(seat.begin(), seat.end(), seat.begin(), ::toupper);
+            
+            if (seat == "0") {
+                validSeat = true;
+                seat = "";
+            } else if (isSeatAvailable(movieID, date, seat)) {
+                validSeat = true;
+            } else {
+                cout << "Invalid or already booked seat. Please try again." << endl;
+            }
+        }
+        return seat;
+    }
+
+    Schedule getValidSchedule() {
+        string date, time;
+        bool valid = false;
+        
+        while (!valid) {
+            cout << "Enter date (YYYY-MM-DD): ";
+            cin >> date;
+            if (!isValidDate(date)) {
+                cout << "Invalid date format. Please use YYYY-MM-DD." << endl;
+                continue;
+            }
+
+            cout << "Enter time (HH:MM): ";
+            cin >> time;
+            if (!isValidTime(time)) {
+                cout << "Invalid time format. Please use HH:MM." << endl;
+                continue;
+            }
+
+            valid = true;
+        }
+        return Schedule(date, time);
+    }
+};
+
+// Initialize static member
+CinemaBookingSystem* CinemaBookingSystem::instance = nullptr;
+
+// Customer method implementations
+void Customer::viewMovies() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    const vector<Movie>& movies = system->getMovies();
+    
+    cout << "\n=== Available Movies ===" << endl;
+    if (movies.empty()) {
+        cout << "No movies available at this time." << endl;
+        return;
+    }
+    
+    for (const auto& movie : movies) {
+        movie.displayDetails();
+    }
+}
+
+void Customer::bookTicket() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    vector<Movie>& movies = system->getMovies();
+    
+    viewMovies();
+    
+    if (movies.empty()) {
+        cout << "No movies available for booking." << endl;
+        return;
+    }
+    
+    cout << "Enter movie number to book (0 to cancel): ";
+    int movieChoice = getValidChoice(0, movies.size());
+    
+    if (movieChoice == 0) {
+        cout << "Booking cancelled." << endl;
+        return;
+    }
+    
+    Movie& selectedMovie = movies[movieChoice - 1];
+    const vector<Schedule>& schedules = selectedMovie.getSchedules();
+    
+    if (schedules.empty()) {
+        cout << "No schedules available for this movie." << endl;
+        return;
+    }
+    
+    cout << "\nAvailable schedules for " << selectedMovie.getTitle() << ":" << endl;
+    for (size_t i = 0; i < schedules.size(); i++) {
+        cout << i+1 << ". ";
+        schedules[i].display();
+        cout << endl;
+    }
+    
+    cout << "Enter schedule number (0 to cancel): ";
+    int scheduleChoice = getValidChoice(0, schedules.size());
+    
+    if (scheduleChoice == 0) {
+        cout << "Booking cancelled." << endl;
+        return;
+    }
+    
+    Schedule selectedSchedule = schedules[scheduleChoice - 1];
+    
+    // Display theater layout
+    cout << "\n\t\t=== THEATER LAYOUT ===" << endl;
+    system->displaySeatLayout(selectedMovie.getMovieID(), selectedSchedule.getDate());
+    
+    string seat = system->getValidSeat(selectedMovie.getMovieID(), selectedSchedule.getDate());
+    if (seat.empty()) {
+        cout << "Booking cancelled." << endl;
+        return;
+    }
+    
+    // Show selection confirmation
+    cout << "\n\tYou have selected: " << seat << endl;
+    cout << "\t----------------------------" << endl;
+    
+    cout << "\n=== Booking Summary ===" << endl;
+    cout << "Movie: " << selectedMovie.getTitle() << endl;
+    cout << "Date: " << selectedSchedule.getDate() << endl;
+    cout << "Time: " << selectedSchedule.getTime() << endl;
+    cout << "Seat: " << seat << endl;
+    
+    if (getConfirmation("Confirm booking?")) {
+        system->addBooking(Booking(getUsername(), selectedMovie.getMovieID(), selectedSchedule, seat));
+        cout << "\n\t*********************************" << endl;
+        cout << "\t*                               *" << endl;
+        cout << "\t*      BOOKING CONFIRMED!       *" << endl;
+        cout << "\t*                               *" << endl;
+        cout << "\t*********************************" << endl;
+    } else {
+        cout << "Booking cancelled." << endl;
+    }
+}
+
+void Customer::viewBookings() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    const vector<Booking>& bookings = system->getBookings();
+    const vector<Movie>& movies = system->getMovies();
+    
+    cout << "\n=== My Bookings ===" << endl;
+    
+    bool hasBookings = false;
+    for (const auto& booking : bookings) {
+        if (booking.getCustomerUsername() == getUsername()) {
+            booking.displayDetails(movies);
+            hasBookings = true;
+        }
+    }
+    
+    if (!hasBookings) {
+        cout << "You have no bookings." << endl;
+    }
+}
+
+void Customer::editBooking() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    vector<Booking>& bookings = system->getBookings();
+    vector<Movie>& movies = system->getMovies();
+    
+    cout << "\n=== My Bookings ===" << endl;
+    vector<int> userBookingIndices;
+    int count = 1;
+    
+    for (size_t i = 0; i < bookings.size(); i++) {
+        if (bookings[i].getCustomerUsername() == getUsername()) {
+            cout << count << ".";
+            bookings[i].displayDetails(movies);
+            userBookingIndices.push_back(i);
+            count++;
+        }
+    }
+    
+    if (userBookingIndices.empty()) {
+        cout << "You have no bookings to edit." << endl;
+        return;
+    }
+    
+    cout << "Enter booking number to edit (0 to cancel): ";
+    int bookingChoice = getValidChoice(0, userBookingIndices.size());
+    
+    if (bookingChoice == 0) {
+        cout << "Edit cancelled." << endl;
+        return;
+    }
+    
+    int actualIndex = userBookingIndices[bookingChoice - 1];
+    Booking& bookingToEdit = bookings[actualIndex];
+    
+    Movie* selectedMovie = nullptr;
+    for (auto& movie : movies) {
+        if (movie.getMovieID() == bookingToEdit.getMovieID()) {
+            selectedMovie = &movie;
+            break;
+        }
+    }
+    
+    if (!selectedMovie) {
+        cout << "Error: Movie not found." << endl;
+        return;
+    }
+    
+    const vector<Schedule>& schedules = selectedMovie->getSchedules();
+    cout << "\nAvailable schedules for " << selectedMovie->getTitle() << ":" << endl;
+    for (size_t i = 0; i < schedules.size(); i++) {
+        cout << i+1 << ". ";
+        schedules[i].display();
+        cout << endl;
+    }
+    
+    cout << "Enter new schedule number (0 to keep current): ";
+    int scheduleChoice = getValidChoice(0, schedules.size());
+    
+    Schedule newSchedule = bookingToEdit.getSchedule();
+    if (scheduleChoice > 0) {
+        newSchedule = schedules[scheduleChoice - 1];
+    }
+    
+    system->displaySeatLayout(selectedMovie->getMovieID(), newSchedule.getDate());
+    
+    cout << "Enter new seat (current: " << bookingToEdit.getSeat() << ", enter 0 to keep current): ";
+    string newSeat = system->getValidSeat(selectedMovie->getMovieID(), newSchedule.getDate());
+    if (newSeat.empty()) {
+        newSeat = bookingToEdit.getSeat();
+    }
+    
+    cout << "\n=== Updated Booking Summary ===" << endl;
+    cout << "Movie: " << selectedMovie->getTitle() << endl;
+    cout << "Date: " << newSchedule.getDate() << endl;
+    cout << "Time: " << newSchedule.getTime() << endl;
+    cout << "Seat: " << newSeat << endl;
+    
