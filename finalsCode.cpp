@@ -1114,3 +1114,300 @@ void Admin::viewAllBookings() {
     
     cout << "\nTotal bookings: " << bookings.size() << endl;
 }
+
+
+void Admin::manageSeats() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    vector<Movie>& movies = system->getMovies();
+    
+    if (movies.empty()) {
+        cout << "No movies available to manage seats." << endl;
+        return;
+    }
+    
+    cout << "\n=== Available Movies ===" << endl;
+    for (size_t i = 0; i < movies.size(); i++) {
+        cout << i+1 << ".";
+        movies[i].displayDetails();
+    }
+    
+    cout << "Enter movie number to manage seats (0 to cancel): ";
+    int movieChoice = getValidChoice(0, movies.size());
+    
+    if (movieChoice == 0) {
+        cout << "Operation cancelled." << endl;
+        return;
+    }
+    
+    Movie& selectedMovie = movies[movieChoice - 1];
+    const vector<Schedule>& schedules = selectedMovie.getSchedules();
+    
+    if (schedules.empty()) {
+        cout << "No schedules available for this movie." << endl;
+        return;
+    }
+    
+    cout << "\nAvailable dates for " << selectedMovie.getTitle() << ":" << endl;
+    for (size_t i = 0; i < schedules.size(); i++) {
+        cout << i+1 << ". " << schedules[i].getDate() << endl;
+    }
+    
+    cout << "Enter date number to manage seats (0 to cancel): ";
+    int dateChoice = getValidChoice(0, schedules.size());
+    
+    if (dateChoice == 0) {
+        cout << "Operation cancelled." << endl;
+        return;
+    }
+    
+    string selectedDate = schedules[dateChoice - 1].getDate();
+    
+    system->displaySeatLayout(selectedMovie.getMovieID(), selectedDate);
+    
+    cout << "\n1. Add new seat" << endl;
+    cout << "2. Remove seat" << endl;
+    cout << "3. Back to menu" << endl;
+    cout << "Enter choice: ";
+    int choice = getValidChoice(1, 3);
+    
+    switch (choice) {
+        case 1: {
+            string newSeat;
+            cout << "Enter new seat ID (e.g., I1): ";
+            cin >> newSeat;
+            clearInputBuffer();
+            transform(newSeat.begin(), newSeat.end(), newSeat.begin(), ::toupper);
+            
+            if (system->isSeatAvailable(selectedMovie.getMovieID(), selectedDate, newSeat)) {
+                system->bookSeat(selectedMovie.getMovieID(), selectedDate, newSeat);
+                system->freeSeat(selectedMovie.getMovieID(), selectedDate, newSeat);
+                system->saveData();
+                cout << "Seat added successfully." << endl;
+            } else {
+                cout << "Seat already exists." << endl;
+            }
+            break;
+        }
+        case 2: {
+            string seatToRemove;
+            cout << "Enter seat ID to remove: ";
+            cin >> seatToRemove;
+            clearInputBuffer();
+            transform(seatToRemove.begin(), seatToRemove.end(), seatToRemove.begin(), ::toupper);
+            
+            if (!system->isSeatAvailable(selectedMovie.getMovieID(), selectedDate, seatToRemove)) {
+                cout << "Seat doesn't exist." << endl;
+            } else {
+                bool isBooked = false;
+                for (const auto& booking : system->getBookings()) {
+                    if (booking.getMovieID() == selectedMovie.getMovieID() && 
+                        booking.getSchedule().getDate() == selectedDate && 
+                        booking.getSeat() == seatToRemove) {
+                        isBooked = true;
+                        break;
+                    }
+                }
+                
+                if (isBooked) {
+                    cout << "Cannot remove seat because it has active bookings." << endl;
+                } else {
+                    system->freeSeat(selectedMovie.getMovieID(), selectedDate, seatToRemove);
+                    system->saveData();
+                    cout << "Seat removed successfully." << endl;
+                }
+            }
+            break;
+        }
+    }
+}
+
+void Admin::manageSchedules() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    vector<Movie>& movies = system->getMovies();
+    
+    if (movies.empty()) {
+        cout << "No movies available to manage schedules." << endl;
+        return;
+    }
+    
+    cout << "\n=== Available Movies ===" << endl;
+    for (size_t i = 0; i < movies.size(); i++) {
+        cout << i+1 << ".";
+        movies[i].displayDetails();
+    }
+    
+    cout << "Enter movie number to manage schedules (0 to cancel): ";
+    int movieChoice = getValidChoice(0, movies.size());
+    
+    if (movieChoice == 0) {
+        cout << "Operation cancelled." << endl;
+        return;
+    }
+    
+    Movie& selectedMovie = movies[movieChoice - 1];
+    
+    cout << "\nCurrent schedules for " << selectedMovie.getTitle() << ":" << endl;
+    const vector<Schedule>& schedules = selectedMovie.getSchedules();
+    for (size_t i = 0; i < schedules.size(); i++) {
+        cout << i+1 << ". ";
+        schedules[i].display();
+        cout << endl;
+    }
+    
+    cout << "\n1. Add schedule" << endl;
+    cout << "2. Remove schedule" << endl;
+    cout << "3. Back to menu" << endl;
+    cout << "Enter choice: ";
+    int choice = getValidChoice(1, 3);
+    
+    switch (choice) {
+        case 1: {
+            cout << "\nAdding new schedule:" << endl;
+            Schedule newSchedule = system->getValidSchedule();
+            selectedMovie.addSchedule(newSchedule);
+            system->initializeSeatsForNewMovie(selectedMovie.getMovieID(), newSchedule.getDate());
+            system->saveData();
+            cout << "Schedule added successfully." << endl;
+            break;
+        }
+        case 2:
+            if (!schedules.empty()) {
+                cout << "Enter schedule number to remove: ";
+                int removeIndex = getValidChoice(1, schedules.size());
+                
+                if (system->hasBookingsForSchedule(selectedMovie.getMovieID(), schedules[removeIndex - 1].getDate())) {
+                    cout << "Cannot remove schedule because there are existing bookings." << endl;
+                } else {
+                    system->removeSeatsForMovie(selectedMovie.getMovieID(), schedules[removeIndex - 1].getDate());
+                    selectedMovie.removeSchedule(removeIndex - 1);
+                    system->saveData();
+                    cout << "Schedule removed successfully." << endl;
+                }
+            } else {
+                cout << "No schedules to remove." << endl;
+            }
+            break;
+    }
+}
+
+void Admin::generateReports() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    const vector<Booking>& bookings = system->getBookings();
+    const vector<Movie>& movies = system->getMovies();
+    
+    if (bookings.empty()) {
+        cout << "No bookings to generate reports." << endl;
+        return;
+    }
+    
+    map<int, int> movieBookingCount;
+    for (const auto& booking : bookings) {
+        movieBookingCount[booking.getMovieID()]++;
+    }
+    
+    cout << "\n=== Sales Report ===" << endl;
+    cout << left << setw(30) << "Movie Title" << setw(10) << "Bookings" << endl;
+    cout << setfill('-') << setw(40) << "" << setfill(' ') << endl;
+    
+    for (const auto& movie : movies) {
+        auto it = movieBookingCount.find(movie.getMovieID());
+        if (it != movieBookingCount.end()) {
+            cout << left << setw(30) << movie.getTitle() << setw(10) << it->second << endl;
+        }
+    }
+    
+    cout << "\nTotal bookings: " << bookings.size() << endl;
+}
+
+void Admin::displayMenu() {
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    bool logout = false;
+    
+    while (!logout) {
+        cout << "\n=== Admin Menu ===" << endl;
+        cout << "1. Add Movie" << endl;
+        cout << "2. Edit Movie" << endl;
+        cout << "3. Delete Movie" << endl;
+        cout << "4. View All Bookings" << endl;
+        cout << "5. Manage Seats" << endl;
+        cout << "6. Manage Schedules" << endl;
+        cout << "7. Generate Reports" << endl;
+        cout << "8. Logout" << endl;
+        
+        int choice = getValidChoice(1, 8);
+
+        switch (choice) {
+            case 1:
+                addMovie();
+                break;
+            case 2:
+                editMovie();
+                break;
+            case 3:
+                deleteMovie();
+                break;
+            case 4:
+                viewAllBookings();
+                break;
+            case 5:
+                manageSeats();
+                break;
+            case 6:
+                manageSchedules();
+                break;
+            case 7:
+                generateReports();
+                break;
+            case 8:
+                cout << "Logging out..." << endl;
+                logout = true;
+                break;
+        }
+    }
+}
+
+int main() {
+    // Initialize system
+    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
+    
+    // Add default admin if none exists
+    bool hasAdmin = false;
+    for (const auto& user : system->getUsers()) {
+        if (user->getUserType() == "ADMIN") {
+            hasAdmin = true;
+            break;
+        }
+    }
+    
+    if (!hasAdmin) {
+        system->getUsers().push_back(make_unique<Admin>("admin", "admin123"));
+        system->saveData();
+    }
+
+    // Main menu loop
+    bool exitProgram = false;
+    while (!exitProgram) {
+        cout << "\n=== Cinema Booking System ===" << endl;
+        cout << "1. Login" << endl;
+        cout << "2. Register" << endl;
+        cout << "3. Exit" << endl;
+        
+        switch (getValidChoice(1, 3)) {
+            case 1: {
+                if (User* user = system->login()) {
+                    user->displayMenu();
+                }
+                break;
+            }
+            case 2:
+                system->registerUser();
+                break;
+            case 3:
+                exitProgram = getConfirmation("Are you sure you want to exit?");
+                break;
+        }
+    }
+
+    CinemaBookingSystem::cleanup();
+    return 0;
+}
