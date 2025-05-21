@@ -88,6 +88,22 @@ bool isValidTime(const string& time) {
     return hour >= 0 && hour < 24 && minute >= 0 && minute < 60;
 }
 
+// Add this helper function after the other helper functions
+string getValidPaymentMode() {
+    cout << "\nSelect Payment Mode:" << endl;
+    cout << "1. Cash" << endl;
+    cout << "2. Credit/Debit Card" << endl;
+    cout << "3. GCash" << endl;
+    
+    int choice = getValidChoice(1, 3);
+    switch (choice) {
+        case 1: return "Cash";
+        case 2: return "Credit/Debit Card";
+        case 3: return "GCash";
+        default: return "Cash";
+    }
+}
+
 // Class definitions
 class Schedule {
 private:
@@ -137,7 +153,6 @@ public:
     string getUserType() const override { return "CUSTOMER"; }
 
     void displayMenu() override;
-    void viewMovies();
     void bookTicket();
     void viewBookings();
     void editBooking();
@@ -209,11 +224,13 @@ private:
     Schedule schedule;
     string seat;
     double price;
+    string paymentMode;
     static int nextBookingID;
 
 public:
-    Booking(string username, int mID, const Schedule& sched, string st, double p) :
-        customerUsername(username), movieID(mID), schedule(sched), seat(st), price(p), bookingID(nextBookingID++) {}
+    Booking(string username, int mID, const Schedule& sched, string st, double p, string pm) :
+        customerUsername(username), movieID(mID), schedule(sched), seat(st), price(p), 
+        paymentMode(pm), bookingID(nextBookingID++) {}
 
     int getBookingID() const { return bookingID; }
     string getCustomerUsername() const { return customerUsername; }
@@ -221,6 +238,7 @@ public:
     Schedule getSchedule() const { return schedule; }
     string getSeat() const { return seat; }
     double getPrice() const { return price; }
+    string getPaymentMode() const { return paymentMode; }
 
     void displayDetails(const vector<Movie>& movies) const {
         string movieTitle = "Unknown";
@@ -237,7 +255,8 @@ public:
              << "Date: " << schedule.getDate() << endl
              << "Time: " << schedule.getTime() << endl
              << "Seat: " << seat << endl
-             << "Price: $" << fixed << setprecision(2) << price << endl;
+             << "Price: $" << fixed << setprecision(2) << price << endl
+             << "Payment Mode: " << paymentMode << endl;
     }
 };
 int Booking::nextBookingID = 1;
@@ -339,7 +358,8 @@ private:
                             stoi(tokens[2]), 
                             Schedule(tokens[3], tokens[4]), 
                             tokens[5],
-                            stod(tokens[6])
+                            stod(tokens[6]),
+                            tokens[7]
                         ));
                     } catch (...) {
                         cerr << "Error loading booking: " << line << endl;
@@ -436,7 +456,7 @@ public:
                 bookingFile << booking.getBookingID() << "," << booking.getCustomerUsername() << ","
                            << booking.getMovieID() << "," << booking.getSchedule().getDate() << ","
                            << booking.getSchedule().getTime() << "," << booking.getSeat() << ","
-                           << fixed << setprecision(2) << booking.getPrice() << endl;
+                           << fixed << setprecision(2) << booking.getPrice() << "," << booking.getPaymentMode() << endl;
             }
             bookingFile.close();
         }
@@ -656,7 +676,7 @@ public:
         }
     }
 
-    void updateBooking(int index, const Schedule& newSchedule, const string& newSeat, double newPrice) {
+    void updateBooking(int index, const Schedule& newSchedule, const string& newSeat, double newPrice, const string& newPaymentMode) {
         if (index >= 0 && index < bookings.size()) {
             Booking& booking = bookings[index];
             freeSeat(booking.getMovieID(), booking.getSchedule().getDate(), booking.getSeat());
@@ -665,7 +685,8 @@ public:
                 booking.getMovieID(),
                 newSchedule,
                 newSeat,
-                newPrice
+                newPrice,
+                newPaymentMode
             );
             bookSeat(booking.getMovieID(), newSchedule.getDate(), newSeat);
             saveData();
@@ -722,30 +743,19 @@ public:
 CinemaBookingSystem* CinemaBookingSystem::instance = nullptr;
 
 // Customer method implementations
-void Customer::viewMovies() {
-    CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
-    const vector<Movie>& movies = system->getMovies();
-    
-    cout << "\n=== Available Movies ===" << endl;
-    if (movies.empty()) {
-        cout << "No movies available at this time." << endl;
-        return;
-    }
-    
-    for (const auto& movie : movies) {
-        movie.displayDetails();
-    }
-}
-
 void Customer::bookTicket() {
     CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
     vector<Movie>& movies = system->getMovies();
     
-    viewMovies();
-    
     if (movies.empty()) {
         cout << "No movies available for booking." << endl;
         return;
+    }
+    
+    cout << "\n=== Available Movies ===" << endl;
+    for (size_t i = 0; i < movies.size(); i++) {
+        cout << i+1 << ".";
+        movies[i].displayDetails();
     }
     
     cout << "Enter movie number to book (0 to cancel): ";
@@ -803,13 +813,25 @@ void Customer::bookTicket() {
     cout << "Seat: " << seat << endl;
     cout << "Price: $" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
     
-    if (getConfirmation("Confirm booking?")) {
-        system->addBooking(Booking(getUsername(), selectedMovie.getMovieID(), selectedSchedule, seat, selectedMovie.getPrice()));
-        cout << "\n\t*********************************" << endl;
-        cout << "\t*                               *" << endl;
-        cout << "\t*      BOOKING CONFIRMED!       *" << endl;
-        cout << "\t*                               *" << endl;
-        cout << "\t*********************************" << endl;
+    if (getConfirmation("Confirm booking details?")) {
+        string paymentMode = getValidPaymentMode();
+        
+        cout << "\nPayment Summary:" << endl;
+        cout << "Amount to Pay: $" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
+        cout << "Payment Mode: " << paymentMode << endl;
+        
+        if (getConfirmation("Confirm payment?")) {
+            system->addBooking(Booking(getUsername(), selectedMovie.getMovieID(), selectedSchedule, seat, selectedMovie.getPrice(), paymentMode));
+            cout << "\n\t*********************************" << endl;
+            cout << "\t*                               *" << endl;
+            cout << "\t*      BOOKING CONFIRMED!       *" << endl;
+            cout << "\t*                               *" << endl;
+            cout << "\t*********************************" << endl;
+            cout << "\nPayment of $" << fixed << setprecision(2) << selectedMovie.getPrice() 
+                 << " via " << paymentMode << " has been processed." << endl;
+        } else {
+            cout << "Payment cancelled. Booking not confirmed." << endl;
+        }
     } else {
         cout << "Booking cancelled." << endl;
     }
@@ -914,10 +936,23 @@ void Customer::editBooking() {
     cout << "Time: " << newSchedule.getTime() << endl;
     cout << "Seat: " << newSeat << endl;
     cout << "Price: $" << fixed << setprecision(2) << newPrice << endl;
+    cout << "Current Payment Mode: " << bookingToEdit.getPaymentMode() << endl;
+    
+    string newPaymentMode = bookingToEdit.getPaymentMode();
+    if (getConfirmation("Would you like to change the payment mode?")) {
+        newPaymentMode = getValidPaymentMode();
+    }
+    
+    cout << "\nFinal Payment Summary:" << endl;
+    cout << "Amount to Pay: $" << fixed << setprecision(2) << newPrice << endl;
+    cout << "Payment Mode: " << newPaymentMode << endl;
     
     if (getConfirmation("Confirm changes?")) {
-        system->updateBooking(actualIndex, newSchedule, newSeat, newPrice);
+        system->updateBooking(actualIndex, newSchedule, newSeat, newPrice, newPaymentMode);
         cout << "Booking updated successfully!" << endl;
+        if (newPaymentMode != bookingToEdit.getPaymentMode()) {
+            cout << "Payment mode has been updated to: " << newPaymentMode << endl;
+        }
     } else {
         cout << "Edit cancelled." << endl;
     }
@@ -970,32 +1005,28 @@ void Customer::displayMenu() {
     
     while (!logout) {
         cout << "\n=== Customer Menu ===" << endl;
-        cout << "1. View Movies" << endl;
-        cout << "2. Book Ticket" << endl;
-        cout << "3. View My Bookings" << endl;
-        cout << "4. Edit Booking" << endl;
-        cout << "5. Cancel Booking" << endl;
-        cout << "6. Logout" << endl;
+        cout << "1. Book Ticket" << endl;
+        cout << "2. View My Bookings" << endl;
+        cout << "3. Edit Booking" << endl;
+        cout << "4. Cancel Booking" << endl;
+        cout << "5. Logout" << endl;
         
-        int choice = getValidChoice(1, 6);
+        int choice = getValidChoice(1, 5);
 
         switch (choice) {
             case 1:
-                viewMovies();
-                break;
-            case 2:
                 bookTicket();
                 break;
-            case 3:
+            case 2:
                 viewBookings();
                 break;
-            case 4:
+            case 3:
                 editBooking();
                 break;
-            case 5:
+            case 4:
                 cancelBooking();
                 break;
-            case 6:
+            case 5:
                 cout << "Logging out..." << endl;
                 logout = true;
                 break;
@@ -1142,6 +1173,7 @@ void Admin::editMovie() {
 void Admin::deleteMovie() {
     CinemaBookingSystem* system = CinemaBookingSystem::getInstance();
     vector<Movie>& movies = system->getMovies();
+    vector<Booking>& bookings = system->getBookings();
     
     if (movies.empty()) {
         cout << "No movies available to delete." << endl;
@@ -1165,17 +1197,39 @@ void Admin::deleteMovie() {
     if (getConfirmation("Are you sure you want to delete this movie?")) {
         int movieID = movies[movieChoice - 1].getMovieID();
         
-        if (system->hasBookingsForSchedule(movieID, "")) {
-            cout << "Cannot delete movie because there are existing bookings." << endl;
-        } else {
-            // Remove all seats for this movie
-            for (const auto& schedule : movies[movieChoice - 1].getSchedules()) {
-                system->removeSeatsForMovie(movieID, schedule.getDate());
+        // Count how many bookings will be affected
+        int bookingsToRemove = 0;
+        for (const auto& booking : bookings) {
+            if (booking.getMovieID() == movieID) {
+                bookingsToRemove++;
             }
-            movies.erase(movies.begin() + movieChoice - 1);
-            system->saveData();
-            cout << "Movie deleted successfully." << endl;
         }
+        
+        if (bookingsToRemove > 0) {
+            cout << "\nWarning: This movie has " << bookingsToRemove << " active booking(s)." << endl;
+            if (!getConfirmation("Deleting this movie will also remove all associated bookings. Continue?")) {
+                cout << "Deletion cancelled." << endl;
+                return;
+            }
+            
+            // Remove all bookings for this movie
+            auto it = remove_if(bookings.begin(), bookings.end(),
+                [movieID](const Booking& booking) {
+                    return booking.getMovieID() == movieID;
+                });
+            bookings.erase(it, bookings.end());
+            cout << bookingsToRemove << " booking(s) have been removed." << endl;
+        }
+        
+        // Remove all seats for this movie
+        for (const auto& schedule : movies[movieChoice - 1].getSchedules()) {
+            system->removeSeatsForMovie(movieID, schedule.getDate());
+        }
+        
+        // Remove the movie
+        movies.erase(movies.begin() + movieChoice - 1);
+        system->saveData();
+        cout << "Movie deleted successfully." << endl;
     } else {
         cout << "Deletion cancelled." << endl;
     }
