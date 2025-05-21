@@ -58,6 +58,11 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "iomanip": "cpp",
+<<<<<<< HEAD
     "iostream": "cpp"
+=======
+    "iostream": "cpp",
+    "ostream": "cpp"
+>>>>>>> master
   }
 }

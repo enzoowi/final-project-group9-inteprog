@@ -5,3 +5,7 @@ CUSTOMER,brian,brian,brian miranda
 CUSTOMER,boriz,boriz,boriz macalintal
 CUSTOMER,aaron,aaron,aaron naval
 CUSTOMER,andrei,andrei,andrei carandang
+<<<<<<< HEAD
+=======
+CUSTOMER,hello,hello,hello hello
+>>>>>>> master

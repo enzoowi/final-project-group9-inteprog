@@ -210,18 +210,18 @@ public:
 
     void displayDetails() const {
         cout << "\n\t╔═══════════════════════════════════╗" << endl;
-        cout << CYAN << "\t║          Movie Details             ║" << RESET << endl;
+        cout << CYAN << "\t║          Movie Details            ║" << RESET << endl;
         cout << "\t╠═══════════════════════════════════╣" << endl;
-        cout << "\t║  Movie ID: " << YELLOW << setw(20) << left << movieID << RESET << "║" << endl;
-        cout << "\t║  Title: " << YELLOW << setw(22) << left << title << RESET << "║" << endl;
-        cout << "\t║  Genre: " << YELLOW << setw(22) << left << genre << RESET << "║" << endl;
-        cout << "\t║  Price: $" << GREEN << setw(20) << left << fixed << setprecision(2) << price << RESET << "║" << endl;
+        cout << "\t║  Movie ID: " << YELLOW << setw(23) << left << movieID << RESET << "║" << endl;
+        cout << "\t║  Title: " << YELLOW << setw(26) << left << title << RESET << "║" << endl;
+        cout << "\t║  Genre: " << YELLOW << setw(26) << left << genre << RESET << "║" << endl;
+        cout << "\t║  Price: ₱" << GREEN << setw(25) << left << fixed << setprecision(2) << price << RESET << "║" << endl;
         cout << "\t╠═══════════════════════════════════╣" << endl;
-        cout << CYAN << "\t║          Schedules                 ║" << RESET << endl;
+        cout << CYAN << "\t║          Schedules                ║" << RESET << endl;
         cout << "\t╠═══════════════════════════════════╣" << endl;
         for (size_t i = 0; i < schedules.size(); i++) {
             string schedStr = schedules[i].getDate() + " at " + schedules[i].getTime();
-            cout << "\t║  " << YELLOW << setw(2) << left << i+1 << ". " << setw(23) << left << schedStr << RESET << "║" << endl;
+            cout << "\t║  " << YELLOW << setw(2) << left << i+1 << ". " << setw(29) << left << schedStr << RESET << "║" << endl;
         }
         cout << "\t╚═══════════════════════════════════╝" << endl;
     }
@@ -262,16 +262,16 @@ public:
         }
         
         cout << "\n\t╔═══════════════════════════════════╗" << endl;
-        cout << CYAN << "\t║         Booking Details            ║" << RESET << endl;
+        cout << CYAN << "\t║         Booking Details           ║" << RESET << endl;
         cout << "\t╠═══════════════════════════════════╣" << endl;
-        cout << "\t║  Booking ID: " << YELLOW << setw(18) << left << bookingID << RESET << "║" << endl;
-        cout << "\t║  Customer: " << YELLOW << setw(20) << left << customerUsername << RESET << "║" << endl;
-        cout << "\t║  Movie: " << YELLOW << setw(23) << left << movieTitle << RESET << "║" << endl;
-        cout << "\t║  Date: " << YELLOW << setw(24) << left << schedule.getDate() << RESET << "║" << endl;
-        cout << "\t║  Time: " << YELLOW << setw(24) << left << schedule.getTime() << RESET << "║" << endl;
-        cout << "\t║  Seat: " << YELLOW << setw(24) << left << seat << RESET << "║" << endl;
-        cout << "\t║  Price: $" << GREEN << setw(22) << left << fixed << setprecision(2) << price << RESET << "║" << endl;
-        cout << "\t║  Payment Mode: " << YELLOW << setw(16) << left << paymentMode << RESET << "║" << endl;
+        cout << "\t║  Booking ID: " << YELLOW << setw(21) << left << bookingID << RESET << "║" << endl;
+        cout << "\t║  Customer: " << YELLOW << setw(23) << left << customerUsername << RESET << "║" << endl;
+        cout << "\t║  Movie: " << YELLOW << setw(26) << left << movieTitle << RESET << "║" << endl;
+        cout << "\t║  Date: " << YELLOW << setw(27) << left << schedule.getDate() << RESET << "║" << endl;
+        cout << "\t║  Time: " << YELLOW << setw(27) << left << schedule.getTime() << RESET << "║" << endl;
+        cout << "\t║  Seat: " << YELLOW << setw(27) << left << seat << RESET << "║" << endl;
+        cout << "\t║  Price: ₱" << GREEN << setw(25) << left << fixed << setprecision(2) << price << RESET << "║" << endl;
+        cout << "\t║  Payment Mode: " << YELLOW << setw(19) << left << paymentMode << RESET << "║" << endl;
         cout << "\t╚═══════════════════════════════════╝" << endl;
     }
 };
@@ -536,11 +536,11 @@ public:
         }
 
         cout << "\n\t╔═══════════════════════════════════════════════╗" << endl;
-        cout << CYAN << "\t║                    SCREEN                      ║" << RESET << endl;
+        cout << CYAN << "\t║                    SCREEN                     ║" << RESET << endl;
         cout << "\t╚═══════════════════════════════════════════════╝" << endl;
         
         // Display column numbers
-        cout << "\n\t        ";
+        cout << "\n\t       ";
         for (int num = 1; num <= 10; num++) {
             cout << YELLOW << setw(3) << num << RESET;
         }
@@ -562,7 +562,7 @@ public:
                     cout << " " << RED << "X" << RESET << " ";
                 }
             }
-            cout << "║" << endl;
+            cout << " ║" << endl;
         }
         
         // Create bottom horizontal line using individual characters
@@ -572,8 +572,8 @@ public:
 
         // Display key and additional information
         cout << "\n\t╔═══════════════════════════════════╗" << endl;
-        cout << "\t║    " << GREEN << "O" << RESET << " = Available    " << RED << "X" << RESET << " = Booked     ║" << endl;
-        cout << "\t║    [ ] = Your Selection            ║" << endl;
+        cout << "\t║    " << GREEN << "O" << RESET << " = Available    " << RED << "X" << RESET << " = Booked    ║" << endl;
+        cout << "\t║    [ ] = Your Selection           ║" << endl;
         cout << "\t╚═══════════════════════════════════╝" << endl;
     }
 
@@ -797,7 +797,7 @@ void Customer::bookTicket() {
         movies[i].displayDetails();
     }
     
-    cout << "Enter movie number to book (0 to cancel): ";
+    cout << "Enter movie ID to book (0 to cancel): ";
     int movieChoice = getValidChoice(0, movies.size());
     
     if (movieChoice == 0) {
@@ -842,7 +842,7 @@ void Customer::bookTicket() {
     
     // Show selection confirmation
     cout << "\n\tYou have selected: " << seat << endl;
-    cout << "\tPrice: $" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
+    cout << "\tPrice: ₱" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
     cout << "\t----------------------------" << endl;
     
     cout << "\n=== Booking Summary ===" << endl;
@@ -850,13 +850,13 @@ void Customer::bookTicket() {
     cout << "Date: " << selectedSchedule.getDate() << endl;
     cout << "Time: " << selectedSchedule.getTime() << endl;
     cout << "Seat: " << seat << endl;
-    cout << "Price: $" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
+    cout << "Price: ₱" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
     
     if (getConfirmation("Confirm booking details?")) {
         string paymentMode = getValidPaymentMode();
         
         cout << "\nPayment Summary:" << endl;
-        cout << "Amount to Pay: $" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
+        cout << "Amount to Pay: ₱" << fixed << setprecision(2) << selectedMovie.getPrice() << endl;
         cout << "Payment Mode: " << paymentMode << endl;
         
         if (getConfirmation("Confirm payment?")) {
@@ -866,7 +866,7 @@ void Customer::bookTicket() {
             cout << "\t*      BOOKING CONFIRMED!       *" << endl;
             cout << "\t*                               *" << endl;
             cout << "\t*********************************" << endl;
-            cout << "\nPayment of $" << fixed << setprecision(2) << selectedMovie.getPrice() 
+            cout << "\nPayment of ₱" << fixed << setprecision(2) << selectedMovie.getPrice() 
                  << " via " << paymentMode << " has been processed." << endl;
         } else {
             cout << "Payment cancelled. Booking not confirmed." << endl;
@@ -974,7 +974,7 @@ void Customer::editBooking() {
     cout << "Date: " << newSchedule.getDate() << endl;
     cout << "Time: " << newSchedule.getTime() << endl;
     cout << "Seat: " << newSeat << endl;
-    cout << "Price: $" << fixed << setprecision(2) << newPrice << endl;
+    cout << "Price: ₱" << fixed << setprecision(2) << newPrice << endl;
     cout << "Current Payment Mode: " << bookingToEdit.getPaymentMode() << endl;
     
     string newPaymentMode = bookingToEdit.getPaymentMode();
@@ -983,7 +983,7 @@ void Customer::editBooking() {
     }
     
     cout << "\nFinal Payment Summary:" << endl;
-    cout << "Amount to Pay: $" << fixed << setprecision(2) << newPrice << endl;
+    cout << "Amount to Pay: ₱" << fixed << setprecision(2) << newPrice << endl;
     cout << "Payment Mode: " << newPaymentMode << endl;
     
     if (getConfirmation("Confirm changes?")) {
@@ -1097,9 +1097,9 @@ void Admin::addMovie() {
     getline(cin, genre);
     
     double price;
-    cout << "Enter ticket price: $";
+    cout << "Enter ticket price: ₱";
     while (!(cin >> price) || price <= 0) {
-        cout << "Invalid price. Please enter a positive number: $";
+        cout << "Invalid price. Please enter a positive number: ₱";
         cin.clear();
         clearInputBuffer();
     }
@@ -1138,7 +1138,7 @@ void Admin::editMovie() {
         movies[i].displayDetails();
     }
     
-    cout << "Enter movie number to edit (0 to cancel): ";
+    cout << "Enter movie ID to edit (0 to cancel): ";
     int movieChoice = getValidChoice(0, movies.size());
     
     if (movieChoice == 0) {
@@ -1158,8 +1158,8 @@ void Admin::editMovie() {
     cout << "Enter new genre (leave blank to keep current): ";
     getline(cin, newGenre);
     
-    cout << "Current price: $" << fixed << setprecision(2) << movieToEdit.getPrice() << endl;
-    cout << "Enter new price (0 to keep current): $";
+    cout << "Current price: ₱" << fixed << setprecision(2) << movieToEdit.getPrice() << endl;
+    cout << "Enter new price (0 to keep current): ₱";
     cin >> newPrice;
     clearInputBuffer();
     
@@ -1235,7 +1235,7 @@ void Admin::deleteMovie() {
         movies[i].displayDetails();
     }
     
-    cout << "Enter movie number to delete (0 to cancel): ";
+    cout << "Enter movie ID to delete (0 to cancel): ";
     int movieChoice = getValidChoice(0, movies.size());
     
     if (movieChoice == 0) {
@@ -1303,7 +1303,7 @@ void Admin::viewAllBookings() {
     }
     
     cout << "\nTotal bookings: " << bookings.size() << endl;
-    cout << "Total revenue: $" << fixed << setprecision(2) << totalRevenue << endl;
+    cout << "Total revenue: ₱" << fixed << setprecision(2) << totalRevenue << endl;
 }
 
 void Admin::manageSeats() {
@@ -1321,7 +1321,7 @@ void Admin::manageSeats() {
         movies[i].displayDetails();
     }
     
-    cout << "Enter movie number to manage seats (0 to cancel): ";
+    cout << "Enter movie ID to manage seats (0 to cancel): ";
     int movieChoice = getValidChoice(0, movies.size());
     
     if (movieChoice == 0) {
@@ -1485,8 +1485,8 @@ void Admin::generateReports() {
     
     if (bookings.empty()) {
         cout << "\n\t╔═══════════════════════════════════╗" << endl;
-        cout << YELLOW << "\t║      No bookings to generate       ║" << RESET << endl;
-        cout << YELLOW << "\t║           reports.                 ║" << RESET << endl;
+        cout << YELLOW << "\t║      No bookings to generate      ║" << RESET << endl;
+        cout << YELLOW << "\t║           reports.                ║" << RESET << endl;
         cout << "\t╚═══════════════════════════════════╝" << endl;
         return;
     }
@@ -1501,7 +1501,7 @@ void Admin::generateReports() {
     }
     
     cout << "\n\t╔═══════════════════════════════════════════════════╗" << endl;
-    cout << CYAN << "\t║                   Sales Report                     ║" << RESET << endl;
+    cout << CYAN << "\t║                   Sales Report                    ║" << RESET << endl;
     cout << "\t╠═══════════════════════╦═══════════╦═══════════════╣" << endl;
     cout << "\t║      Movie Title      ║  Tickets  ║    Revenue    ║" << endl;
     cout << "\t╠═══════════════════════╬═══════════╬═══════════════╣" << endl;
@@ -1509,16 +1509,16 @@ void Admin::generateReports() {
     for (const auto& movie : movies) {
         auto it = movieStats.find(movie.getMovieID());
         if (it != movieStats.end()) {
-            cout << "\t║ " << YELLOW << left << setw(19) << movie.getTitle().substr(0, 19) << RESET
+            cout << "\t║ " << YELLOW << left << setw(22) << movie.getTitle().substr(0, 19) << RESET
                  << "║ " << CYAN << right << setw(9) << it->second.first << RESET
-                 << " ║ $" << GREEN << right << setw(10) << fixed << setprecision(2) << it->second.second << RESET << " ║" << endl;
+                 << " ║ ₱" << GREEN << right << setw(12) << fixed << setprecision(2) << it->second.second << RESET << " ║" << endl;
         }
     }
     
     cout << "\t╠═══════════════════════╬═══════════╬═══════════════╣" << endl;
     cout << "\t║ " << CYAN << "TOTAL" << RESET << "                 ║ " 
          << CYAN << right << setw(9) << bookings.size() << RESET
-         << " ║ $" << GREEN << right << setw(10) << fixed << setprecision(2) << totalRevenue << RESET << " ║" << endl;
+         << " ║ ₱" << GREEN << right << setw(12) << fixed << setprecision(2) << totalRevenue << RESET << " ║" << endl;
     cout << "\t╚═══════════════════════╩═══════════╩═══════════════╝" << endl;
 }
 
@@ -1528,16 +1528,16 @@ void Admin::displayMenu() {
     
     while (!logout) {
         cout << "\n\n\t╔═══════════════════════════════════╗" << endl;
-        cout << "\t║           Admin Menu               ║" << endl;
+        cout << "\t║           Admin Menu              ║" << endl;
         cout << "\t╠═══════════════════════════════════╣" << endl;
-        cout << "\t║  1. Add Movie                      ║" << endl;
-        cout << "\t║  2. Edit Movie                     ║" << endl;
-        cout << "\t║  3. Delete Movie                   ║" << endl;
-        cout << "\t║  4. View All Bookings              ║" << endl;
-        cout << "\t║  5. Manage Seats                   ║" << endl;
-        cout << "\t║  6. Manage Schedules               ║" << endl;
-        cout << "\t║  7. Generate Reports               ║" << endl;
-        cout << "\t║  8. Logout                         ║" << endl;
+        cout << "\t║  1. Add Movie                     ║" << endl;
+        cout << "\t║  2. Edit Movie                    ║" << endl;
+        cout << "\t║  3. Delete Movie                  ║" << endl;
+        cout << "\t║  4. View All Bookings             ║" << endl;
+        cout << "\t║  5. Manage Seats                  ║" << endl;
+        cout << "\t║  6. Manage Schedules              ║" << endl;
+        cout << "\t║  7. Generate Reports              ║" << endl;
+        cout << "\t║  8. Logout                        ║" << endl;
         cout << "\t╚═══════════════════════════════════╝" << endl;
         
         int choice = getValidChoice(1, 8);
@@ -1597,7 +1597,7 @@ int main() {
     bool exitProgram = false;
     while (!exitProgram) {
         cout << "\n\t╔═══════════════════════════════════╗" << endl;
-        cout << "\t║      Cinema Booking System         ║" << endl;
+        cout << "\t║      Cinema Booking System        ║" << endl;
         cout << "\t╠═══════════════════════════════════╣" << endl;
         cout << "\t║  1. Login                         ║" << endl;
         cout << "\t║  2. Register                      ║" << endl;
