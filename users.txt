@@ -1,0 +1,8 @@
+ADMIN,admin,admin123
+CUSTOMER,magne,magne,magne villamin
+CUSTOMER,HI,Seandre,Jaeefefefe
+CUSTOMER,brian,brian,brian miranda
+CUSTOMER,boriz,boriz,boriz macalintal
+CUSTOMER,aaron,aaron,aaron naval
+CUSTOMER,andrei,andrei,andrei carandang
+CUSTOMER,hello,hello,hello hello
