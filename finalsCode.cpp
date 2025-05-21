@@ -12,6 +12,13 @@
 
 using namespace std;
 
+// Color codes for Windows console
+const string RESET = "\033[0m";
+const string GREEN = "\033[32m";
+const string RED = "\033[31m";
+const string YELLOW = "\033[33m";
+const string CYAN = "\033[36m";
+
 // Forward declarations
 class CinemaBookingSystem;
 
@@ -26,14 +33,14 @@ int getValidChoice(int min, int max) {
     int choice;
     bool valid = false;
     while (!valid) {
-        cout << "Enter your choice (" << min << "-" << max << "): ";
+        cout << CYAN << "\n  Enter your choice (" << min << "-" << max << "): " << RESET;
         if (cin >> choice && choice >= min && choice <= max) {
             clearInputBuffer();
             valid = true;
         } else {
             cin.clear();
             clearInputBuffer();
-            cout << "Invalid input. Please try again." << endl;
+            cout << RED << "\n  Invalid input. Please try again." << RESET << endl;
         }
     }
     return choice;
@@ -44,13 +51,13 @@ bool getConfirmation(const string& prompt) {
     char confirm;
     bool valid = false;
     while (!valid) {
-        cout << prompt << " (Y/N): ";
+        cout << YELLOW << "\n  " << prompt << " (Y/N): " << RESET;
         cin >> confirm;
         clearInputBuffer();
         confirm = toupper(confirm);
         if (confirm == 'Y') return true;
         if (confirm == 'N') return false;
-        cout << "Invalid input. Please enter Y or N." << endl;
+        cout << RED << "\n  Invalid input. Please enter Y or N." << RESET << endl;
     }
     return false;
 }
@@ -202,16 +209,21 @@ public:
     }
 
     void displayDetails() const {
-        cout << "\nMovie ID: " << movieID << endl
-             << "Title: " << title << endl
-             << "Genre: " << genre << endl
-             << "Price: $" << fixed << setprecision(2) << price << endl
-             << "Schedules:" << endl;
+        cout << "\n\t╔═══════════════════════════════════╗" << endl;
+        cout << CYAN << "\t║          Movie Details             ║" << RESET << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
+        cout << "\t║  Movie ID: " << YELLOW << setw(20) << left << movieID << RESET << "║" << endl;
+        cout << "\t║  Title: " << YELLOW << setw(22) << left << title << RESET << "║" << endl;
+        cout << "\t║  Genre: " << YELLOW << setw(22) << left << genre << RESET << "║" << endl;
+        cout << "\t║  Price: $" << GREEN << setw(20) << left << fixed << setprecision(2) << price << RESET << "║" << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
+        cout << CYAN << "\t║          Schedules                 ║" << RESET << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
         for (size_t i = 0; i < schedules.size(); i++) {
-            cout << "  " << i+1 << ". ";
-            schedules[i].display();
-            cout << endl;
+            string schedStr = schedules[i].getDate() + " at " + schedules[i].getTime();
+            cout << "\t║  " << YELLOW << setw(2) << left << i+1 << ". " << setw(23) << left << schedStr << RESET << "║" << endl;
         }
+        cout << "\t╚═══════════════════════════════════╝" << endl;
     }
 };
 int Movie::nextMovieID = 1;
@@ -249,14 +261,18 @@ public:
             }
         }
         
-        cout << "\nBooking ID: " << bookingID << endl
-             << "Customer: " << customerUsername << endl
-             << "Movie: " << movieTitle << endl
-             << "Date: " << schedule.getDate() << endl
-             << "Time: " << schedule.getTime() << endl
-             << "Seat: " << seat << endl
-             << "Price: $" << fixed << setprecision(2) << price << endl
-             << "Payment Mode: " << paymentMode << endl;
+        cout << "\n\t╔═══════════════════════════════════╗" << endl;
+        cout << CYAN << "\t║         Booking Details            ║" << RESET << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
+        cout << "\t║  Booking ID: " << YELLOW << setw(18) << left << bookingID << RESET << "║" << endl;
+        cout << "\t║  Customer: " << YELLOW << setw(20) << left << customerUsername << RESET << "║" << endl;
+        cout << "\t║  Movie: " << YELLOW << setw(23) << left << movieTitle << RESET << "║" << endl;
+        cout << "\t║  Date: " << YELLOW << setw(24) << left << schedule.getDate() << RESET << "║" << endl;
+        cout << "\t║  Time: " << YELLOW << setw(24) << left << schedule.getTime() << RESET << "║" << endl;
+        cout << "\t║  Seat: " << YELLOW << setw(24) << left << seat << RESET << "║" << endl;
+        cout << "\t║  Price: $" << GREEN << setw(22) << left << fixed << setprecision(2) << price << RESET << "║" << endl;
+        cout << "\t║  Payment Mode: " << YELLOW << setw(16) << left << paymentMode << RESET << "║" << endl;
+        cout << "\t╚═══════════════════════════════════╝" << endl;
     }
 };
 int Booking::nextBookingID = 1;
@@ -513,34 +529,52 @@ public:
     void displaySeatLayout(int movieID, const string& date) const {
         auto it = movieSeats.find({movieID, date});
         if (it == movieSeats.end()) {
-            cout << "No seat data available for this date." << endl;
+            cout << "\n\t╔═══════════════════════════════════╗" << endl;
+            cout << YELLOW << "\t║   No seat data for this date      ║" << RESET << endl;
+            cout << "\t╚═══════════════════════════════════╝" << endl;
             return;
         }
 
-        cout << "\n\t\t\t   ============ SCREEN ============" << endl;
-        cout << "\t\t\t   -------------------------------" << endl << endl;
+        cout << "\n\t╔═══════════════════════════════════════════════╗" << endl;
+        cout << CYAN << "\t║                    SCREEN                      ║" << RESET << endl;
+        cout << "\t╚═══════════════════════════════════════════════╝" << endl;
         
         // Display column numbers
-        cout << "      ";
+        cout << "\n\t        ";
         for (int num = 1; num <= 10; num++) {
-            cout << setw(3) << num;
+            cout << YELLOW << setw(3) << num << RESET;
         }
         cout << endl;
 
+        // Create horizontal line using individual characters
+        cout << "\t     ╔";
+        for (int i = 0; i < 31; i++) cout << "═";
+        cout << "╗" << endl;
+        
         // Display seat rows
         for (char row = 'A'; row <= 'H'; row++) {
-            cout << "   " << row << "  ";
+            cout << "\t  " << YELLOW << row << RESET << "  ║";
             for (int num = 1; num <= 10; num++) {
                 string seat = string(1, row) + to_string(num);
-                cout << setw(3) << (it->second.at(seat) ? "O" : "X");
+                if (it->second.at(seat)) {
+                    cout << " " << GREEN << "O" << RESET << " ";
+                } else {
+                    cout << " " << RED << "X" << RESET << " ";
+                }
             }
-            cout << endl;
+            cout << "║" << endl;
         }
+        
+        // Create bottom horizontal line using individual characters
+        cout << "\t     ╚";
+        for (int i = 0; i < 31; i++) cout << "═";
+        cout << "╝" << endl;
 
         // Display key and additional information
-        cout << "\n\tO = Available\tX = Booked\t[ ] = Your Selection" << endl;
-        cout << "\t-----------------------------------------------" << endl;
-        cout << "\t\t   <<< FRONT OF THEATER >>>" << endl << endl;
+        cout << "\n\t╔═══════════════════════════════════╗" << endl;
+        cout << "\t║    " << GREEN << "O" << RESET << " = Available    " << RED << "X" << RESET << " = Booked     ║" << endl;
+        cout << "\t║    [ ] = Your Selection            ║" << endl;
+        cout << "\t╚═══════════════════════════════════╝" << endl;
     }
 
     User* login() {
@@ -549,34 +583,37 @@ public:
         User* user = nullptr;
         
         while (!loggedIn) {
-            cout << "\n=== Login ===" << endl;
-            cout << "Username (or '0' to cancel): ";
+            cout << "\n\t╔═══════════════════════════════════╗" << endl;
+            cout << "\t║             Login                 ║" << endl;
+            cout << "\t╚═══════════════════════════════════╝\n" << endl;
+            
+            cout << "  Username (or '0' to cancel): ";
             getline(cin, username);
             
             // Check for spaces in username
             if (username.find(' ') != string::npos) {
-                cout << "Error: Username cannot contain spaces. Please try again." << endl;
+                cout << RED << "\n  Error: Username cannot contain spaces. Please try again." << RESET << endl;
                 continue;
             }
             
             if (username == "0") {
-                break; // Exit loop
+                break;
             }
             
             bool validPassword = false;
             while (!validPassword && !loggedIn) {
-                cout << "Password: ";
+                cout << "  Password: ";
                 getline(cin, password);
                 
                 // Check for spaces in password
                 if (password.find(' ') != string::npos) {
-                    cout << "Error: Password cannot contain spaces. Please try again." << endl;
+                    cout << RED << "\n  Error: Password cannot contain spaces. Please try again." << RESET << endl;
                     continue;
                 }
 
                 for (const auto& u : users) {
                     if (u->getUsername() == username && u->getPassword() == password) {
-                        cout << "Login successful!" << endl;
+                        cout << GREEN << "\n  Login successful!" << RESET << endl;
                         user = u.get();
                         loggedIn = true;
                         break;
@@ -584,8 +621,8 @@ public:
                 }
                 
                 if (!loggedIn) {
-                    cout << "Invalid username or password. Please try again." << endl;
-                    break; // Go back to username input
+                    cout << RED << "\n  Invalid username or password. Please try again." << RESET << endl;
+                    break;
                 } else {
                     validPassword = true;
                 }
@@ -599,17 +636,19 @@ public:
         bool registered = false;
         
         while (!registered) {
-            cout << "\n=== User Registration ===" << endl;
+            cout << "\n\t╔═══════════════════════════════════╗" << endl;
+            cout << "\t║        User Registration          ║" << endl;
+            cout << "\t╚═══════════════════════════════════╝\n" << endl;
             
             // Get username with space validation
             bool validUsername = false;
             while (!validUsername && !registered) {
-                cout << "Username (no spaces allowed): ";
+                cout << "  Username (no spaces allowed): ";
                 getline(cin, username);
                 if (username.find(' ') != string::npos) {
-                    cout << "Error: Username cannot contain spaces. Please try again." << endl;
+                    cout << RED << "\n  Error: Username cannot contain spaces. Please try again." << RESET << endl;
                 } else if (username.empty()) {
-                    cout << "Error: Username cannot be empty. Please try again." << endl;
+                    cout << RED << "\n  Error: Username cannot be empty. Please try again." << RESET << endl;
                 } else {
                     validUsername = true;
                 }
@@ -626,19 +665,19 @@ public:
             }
             
             if (usernameTaken) {
-                cout << "Error: Username already exists. Please choose another." << endl;
+                cout << RED << "\n  Error: Username already exists. Please choose another." << RESET << endl;
                 continue;
             }
 
             // Get password with space validation
             bool validPassword = false;
             while (!validPassword && !registered) {
-                cout << "Password (no spaces allowed): ";
+                cout << "  Password (no spaces allowed): ";
                 getline(cin, password);
                 if (password.find(' ') != string::npos) {
-                    cout << "Error: Password cannot contain spaces. Please try again." << endl;
+                    cout << RED << "\n  Error: Password cannot contain spaces. Please try again." << RESET << endl;
                 } else if (password.empty()) {
-                    cout << "Error: Password cannot be empty. Please try again." << endl;
+                    cout << RED << "\n  Error: Password cannot be empty. Please try again." << RESET << endl;
                 } else {
                     validPassword = true;
                 }
@@ -646,16 +685,16 @@ public:
             
             if (!validPassword) continue;
 
-            cout << "Full Name: ";
+            cout << "  Full Name: ";
             getline(cin, name);
 
             if (getConfirmation("Confirm registration?")) {
                 users.push_back(make_unique<Customer>(username, password, name));
                 saveData();
-                cout << "Registration successful! You can now login." << endl;
+                cout << GREEN << "\n  Registration successful! You can now login." << RESET << endl;
                 registered = true;
             } else {
-                cout << "Registration cancelled." << endl;
+                cout << YELLOW << "\n  Registration cancelled." << RESET << endl;
                 registered = true;
             }
         }
@@ -1004,30 +1043,40 @@ void Customer::displayMenu() {
     bool logout = false;
     
     while (!logout) {
-        cout << "\n=== Customer Menu ===" << endl;
-        cout << "1. Book Ticket" << endl;
-        cout << "2. View My Bookings" << endl;
-        cout << "3. Edit Booking" << endl;
-        cout << "4. Cancel Booking" << endl;
-        cout << "5. Logout" << endl;
+        cout << "\n\n\t╔═══════════════════════════════════╗" << endl;
+        cout << "\t║          Customer Menu            ║" << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
+        cout << "\t║  1. Book Ticket                   ║" << endl;
+        cout << "\t║  2. View My Bookings              ║" << endl;
+        cout << "\t║  3. Edit Booking                  ║" << endl;
+        cout << "\t║  4. Cancel Booking                ║" << endl;
+        cout << "\t║  5. Logout                        ║" << endl;
+        cout << "\t╚═══════════════════════════════════╝" << endl;
         
         int choice = getValidChoice(1, 5);
 
         switch (choice) {
             case 1:
+                cout << "\n";
                 bookTicket();
                 break;
             case 2:
+                cout << "\n";
                 viewBookings();
                 break;
             case 3:
+                cout << "\n";
                 editBooking();
                 break;
             case 4:
+                cout << "\n";
                 cancelBooking();
                 break;
             case 5:
-                cout << "Logging out..." << endl;
+                cout << "\n\t╔═══════════════════════════════════╗" << endl;
+                cout << YELLOW << "\t║          Logging out...           ║" << RESET << endl;
+                cout << "\t╚═══════════════════════════════════╝" << endl;
+                cout << "\n";
                 logout = true;
                 break;
         }
@@ -1435,38 +1484,42 @@ void Admin::generateReports() {
     const vector<Movie>& movies = system->getMovies();
     
     if (bookings.empty()) {
-        cout << "No bookings to generate reports." << endl;
+        cout << "\n\t╔═══════════════════════════════════╗" << endl;
+        cout << YELLOW << "\t║      No bookings to generate       ║" << RESET << endl;
+        cout << YELLOW << "\t║           reports.                 ║" << RESET << endl;
+        cout << "\t╚═══════════════════════════════════╝" << endl;
         return;
     }
     
-    map<int, pair<int, double>> movieStats; // movieID -> <count, total revenue>
+    map<int, pair<int, double>> movieStats;
     double totalRevenue = 0.0;
     
     for (const auto& booking : bookings) {
-        movieStats[booking.getMovieID()].first++;  // increment count
-        movieStats[booking.getMovieID()].second += booking.getPrice();  // add to revenue
+        movieStats[booking.getMovieID()].first++;
+        movieStats[booking.getMovieID()].second += booking.getPrice();
         totalRevenue += booking.getPrice();
     }
     
-    cout << "\n=== Sales Report ===" << endl;
-    cout << left << setw(30) << "Movie Title" 
-         << setw(10) << "Tickets" 
-         << setw(15) << "Total Revenue" << endl;
-    cout << setfill('-') << setw(55) << "" << setfill(' ') << endl;
+    cout << "\n\t╔═══════════════════════════════════════════════════╗" << endl;
+    cout << CYAN << "\t║                   Sales Report                     ║" << RESET << endl;
+    cout << "\t╠═══════════════════════╦═══════════╦═══════════════╣" << endl;
+    cout << "\t║      Movie Title      ║  Tickets  ║    Revenue    ║" << endl;
+    cout << "\t╠═══════════════════════╬═══════════╬═══════════════╣" << endl;
     
     for (const auto& movie : movies) {
         auto it = movieStats.find(movie.getMovieID());
         if (it != movieStats.end()) {
-            cout << left << setw(30) << movie.getTitle() 
-                 << setw(10) << it->second.first
-                 << "$" << fixed << setprecision(2) << setw(14) << it->second.second << endl;
+            cout << "\t║ " << YELLOW << left << setw(19) << movie.getTitle().substr(0, 19) << RESET
+                 << "║ " << CYAN << right << setw(9) << it->second.first << RESET
+                 << " ║ $" << GREEN << right << setw(10) << fixed << setprecision(2) << it->second.second << RESET << " ║" << endl;
         }
     }
     
-    cout << setfill('-') << setw(55) << "" << setfill(' ') << endl;
-    cout << left << setw(30) << "TOTAL" 
-         << setw(10) << bookings.size() 
-         << "$" << fixed << setprecision(2) << setw(14) << totalRevenue << endl;
+    cout << "\t╠═══════════════════════╬═══════════╬═══════════════╣" << endl;
+    cout << "\t║ " << CYAN << "TOTAL" << RESET << "                 ║ " 
+         << CYAN << right << setw(9) << bookings.size() << RESET
+         << " ║ $" << GREEN << right << setw(10) << fixed << setprecision(2) << totalRevenue << RESET << " ║" << endl;
+    cout << "\t╚═══════════════════════╩═══════════╩═══════════════╝" << endl;
 }
 
 void Admin::displayMenu() {
@@ -1474,15 +1527,18 @@ void Admin::displayMenu() {
     bool logout = false;
     
     while (!logout) {
-        cout << "\n=== Admin Menu ===" << endl;
-        cout << "1. Add Movie" << endl;
-        cout << "2. Edit Movie" << endl;
-        cout << "3. Delete Movie" << endl;
-        cout << "4. View All Bookings" << endl;
-        cout << "5. Manage Seats" << endl;
-        cout << "6. Manage Schedules" << endl;
-        cout << "7. Generate Reports" << endl;
-        cout << "8. Logout" << endl;
+        cout << "\n\n\t╔═══════════════════════════════════╗" << endl;
+        cout << "\t║           Admin Menu               ║" << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
+        cout << "\t║  1. Add Movie                      ║" << endl;
+        cout << "\t║  2. Edit Movie                     ║" << endl;
+        cout << "\t║  3. Delete Movie                   ║" << endl;
+        cout << "\t║  4. View All Bookings              ║" << endl;
+        cout << "\t║  5. Manage Seats                   ║" << endl;
+        cout << "\t║  6. Manage Schedules               ║" << endl;
+        cout << "\t║  7. Generate Reports               ║" << endl;
+        cout << "\t║  8. Logout                         ║" << endl;
+        cout << "\t╚═══════════════════════════════════╝" << endl;
         
         int choice = getValidChoice(1, 8);
 
@@ -1509,7 +1565,10 @@ void Admin::displayMenu() {
                 generateReports();
                 break;
             case 8:
-                cout << "Logging out..." << endl;
+                cout << "\n\t╔═══════════════════════════════════╗" << endl;
+                cout << YELLOW << "\t║          Logging out...           ║" << RESET << endl;
+                cout << "\t╚═══════════════════════════════════╝" << endl;
+                cout << "\n";
                 logout = true;
                 break;
         }
@@ -1537,10 +1596,13 @@ int main() {
     // Main menu loop
     bool exitProgram = false;
     while (!exitProgram) {
-        cout << "\n=== Cinema Booking System ===" << endl;
-        cout << "1. Login" << endl;
-        cout << "2. Register" << endl;
-        cout << "3. Exit" << endl;
+        cout << "\n\t╔═══════════════════════════════════╗" << endl;
+        cout << "\t║      Cinema Booking System         ║" << endl;
+        cout << "\t╠═══════════════════════════════════╣" << endl;
+        cout << "\t║  1. Login                         ║" << endl;
+        cout << "\t║  2. Register                      ║" << endl;
+        cout << "\t║  3. Exit                          ║" << endl;
+        cout << "\t╚═══════════════════════════════════╝" << endl;
         
         switch (getValidChoice(1, 3)) {
             case 1: {
